@@ -1,0 +1,9 @@
+numpy
+os
+tensorflow
+sklearn
+tkinter
+opencv-python
+PIL
+mediapipe
+pyttsx3
