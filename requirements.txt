@@ -1,0 +1,9 @@
+numpy           # For numerical operations
+os              # For interacting with the operating system
+tensorflow      # For building and training the neural network
+sklearn         # For data splitting and preprocessing
+tkinter         # For creating the GUI
+opencv-python   # For image processing and capturing video
+PIL             # For image handling in the GUI
+mediapipe       # For hand landmark detection
+pyttsx3         # For text-to-speech functionality

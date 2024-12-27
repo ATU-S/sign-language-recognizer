@@ -13,6 +13,7 @@ class SignDataCollector:
         self.data_dir = data_dir
         self.img_size = (640, 480)
 
+        # Initialize MediaPipe Hands
         self.mp_hands = mp.solutions.hands
         self.hands = self.mp_hands.Hands(static_image_mode=False, max_num_hands=2)
         self.mp_drawing = mp.solutions.drawing_utils
@@ -38,7 +39,8 @@ class SignDataCollector:
         self.exit_button = tk.Button(root, text="Exit", command=self.exit_app, width=20, height=2)
         self.exit_button.pack(pady=10)
 
-        #self.update_frame()
+        # Continuously update the camera feed
+        self.update_frame()
 
     def start_collection(self):
         # Get the label name

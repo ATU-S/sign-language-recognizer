@@ -5,6 +5,7 @@ import mediapipe as mp
 import tkinter as tk
 from PIL import Image, ImageTk
 import pyttsx3
+import threading
 
 
 class SignLanguagConvertor:
@@ -24,6 +25,7 @@ class SignLanguagConvertor:
         self.cap = cv2.VideoCapture(0)
         self.running = False
         self.speaking = False
+        self.speech_thread = None
 
         # Text-to-Speech Engine
         self.tts_engine = pyttsx3.init()
@@ -80,6 +82,16 @@ class SignLanguagConvertor:
         y_max = int(max([lm.y for lm in hand_landmarks]) * h)
 
         hand_img = image[max(0, y_min):min(h, y_max), max(0, x_min):min(w, x_max)]
+
+        # Maintain aspect ratio by padding
+        hand_img = cv2.copyMakeBorder(hand_img, 
+                                      top=(y_max - y_min) // 2, 
+                                      bottom=(y_max - y_min) // 2, 
+                                      left=(x_max - x_min) // 2, 
+                                      right=(x_max - x_min) // 2, 
+                                      borderType=cv2.BORDER_CONSTANT, 
+                                      value=[0, 0, 0])
+
         hand_img = cv2.resize(hand_img, img_size)
         hand_img = hand_img / 255.0  # Normalize
         return np.expand_dims(hand_img, axis=0)
@@ -88,6 +100,11 @@ class SignLanguagConvertor:
         """Toggles the running state of the app."""
         self.running = not self.running
         self.start_button.config(text="Stop" if self.running else "Start")
+
+    def speak_prediction(self, text):
+        """Speaks the given text using the TTS engine."""
+        self.tts_engine.say(text)
+        self.tts_engine.runAndWait()
 
     def toggle_speaking(self):
         """Toggles the speaking state of the app."""
@@ -111,8 +128,9 @@ class SignLanguagConvertor:
 
                         # Speak the prediction if enabled
                         if self.speaking and predicted_class != "None":
-                            self.tts_engine.say(predicted_class)
-                            self.tts_engine.runAndWait()
+                            if self.speech_thread is None or not self.speech_thread.is_alive():
+                                self.speech_thread = threading.Thread(target=self.speak_prediction, args=(predicted_class,))
+                                self.speech_thread.start()
                     except Exception as e:
                         print(f"Error during prediction: {e}")
             else:
